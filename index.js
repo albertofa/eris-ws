@@ -1,14 +1,26 @@
 const express = require('express')();
+const history = require('connect-history-api-fallback');
 const cors = require('cors')
 const http = require('http').Server(express);
 const io = require('socket.io')(http,  { cors: {origin: '*'}})
 const { nanoid } = require('nanoid')
 
 express.use(cors())
+// Middleware for serving '/dist' directory
+const staticFileMiddleware = require('express').static('dist');
+
+// 1st call for unredirected requests 
+express.use(staticFileMiddleware);
 
 express.get('/login', (req, res) => {
     res.send(nanoid())
 })
+
+express.use(history({
+    index: '/dist/index.html'
+}));
+
+express.use(staticFileMiddleware);
 
 io.on('connection', ws => {
     console.log('connected')
