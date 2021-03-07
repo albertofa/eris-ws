@@ -28,6 +28,11 @@ io.on('connection', ws => {
     ws.on('message', function incoming(data) {
         console.log('received ' + JSON.stringify(data))
         if (data.type == 'newMessage') {
+            ws.broadcast.emit('newMessage', {
+                type: 'newMessage',
+                user: data.user,
+                message: { user: data.message.user, content: data.message.content }
+            })
             ws.emit('newMessage', {
                 type: 'newMessage',
                 user: data.user,
