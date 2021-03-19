@@ -61,7 +61,7 @@ ws.on('connection', (socket: Socket) => {
     })
 })
 
-server.listen(8085, () => {
-    console.log('Listening 8085')
+server.listen(80, () => {
+    console.log('Listening 80')
 })
 
