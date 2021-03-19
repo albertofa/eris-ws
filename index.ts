@@ -79,6 +79,37 @@ if (process.env.IS_TLS == 'true'){
         ca: ca
     }
     const serverHttps = new https.Server(credentials, expressServer)
+    const wss = new io.Server(serverHttps,  { cors: {origin: '*'}})
+
+    const connectedUsers: any = []
+    wss.on('connection', (socket: Socket) => {
+        console.log('connected', socket.id)
+        
+        socket.on('newMessage', (data: any) => {
+            console.log(data)
+            const user = security.getUserFromToken(data.token)
+            if (user) {
+                MessageController.createMessage(data.message, user.id, message => {
+                    socket.broadcast.emit('newMessage', message)
+                    socket.emit('newMessage', message)
+                })
+            }
+        })
+
+        socket.on('joinVoice', (data: string) => {
+            console.log('joinVoice', connectedUsers)
+            socket.join(data)
+            connectedUsers.forEach((room: any) => {
+                console.log('toCall', room)
+                if (room != data && room)
+                    socket.to(room).emit('callVoice', data)
+            });
+            
+            if (!connectedUsers.includes(data))
+                connectedUsers.push(data)
+        })
+    })
+
     
     serverHttps.listen(443, () => {
         console.log('Listening 443')
