@@ -4,6 +4,7 @@ import cors from 'cors'
 import { nanoid } from 'nanoid'
 import MessageController from './api/controllers/message'
 import security from './utils/security'
+import fs from 'fs'
 
 const expressServer = express()
 
@@ -27,7 +28,9 @@ expressServer.use(history({
 expressServer.use(staticFileMiddleware)
 
 import http from 'http'
+import https from 'https'
 const server = new http.Server(expressServer)
+
 
 import io, { Socket } from 'socket.io'
 const ws = new io.Server(server,  { cors: {origin: '*'}})
@@ -65,3 +68,19 @@ server.listen(80, () => {
     console.log('Listening 80')
 })
 
+if (process.env.IS_TLS == 'true'){
+    const privateKey = fs.readFileSync('/etc/letsencrypt/live/li119-45.members.linode.com/privkey.pem', 'utf8');
+    const certificate = fs.readFileSync('/etc/letsencrypt/live/li119-45.members.linode.com/cert.pem', 'utf8');
+    const ca = fs.readFileSync('/etc/letsencrypt/live/li119-45.members.linode.com/chain.pem', 'utf8');
+    
+    const credentials = {
+        key: privateKey,
+        cert: certificate,
+        ca: ca
+    }
+    const serverHttps = new https.Server(credentials, expressServer)
+    
+    serverHttps.listen(443, () => {
+        console.log('Listening 443')
+    })
+}
