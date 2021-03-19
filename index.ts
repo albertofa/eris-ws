@@ -29,12 +29,13 @@ expressServer.use(staticFileMiddleware)
 import http from 'http'
 const server = new http.Server(expressServer)
 
-import io from 'socket.io'
+import io, { Socket } from 'socket.io'
 const ws = new io.Server(server,  { cors: {origin: '*'}})
 
-ws.on('connection', (socket: any) => {
-    console.log('connected')
-
+const connectedUsers: any = []
+ws.on('connection', (socket: Socket) => {
+    console.log('connected', socket.id)
+    
     socket.on('newMessage', (data: any) => {
         console.log(data)
         const user = security.getUserFromToken(data.token)
@@ -45,7 +46,19 @@ ws.on('connection', (socket: any) => {
             })
         }
     })
-    
+
+    socket.on('joinVoice', (data: string) => {
+        console.log('joinVoice', connectedUsers)
+        socket.join(data)
+        connectedUsers.forEach((room: any) => {
+            console.log('toCall', room)
+            if (room != data && room)
+                socket.to(room).emit('callVoice', data)
+        });
+        
+        if (!connectedUsers.includes(data))
+            connectedUsers.push(data)
+    })
 })
 
 server.listen(8085, () => {

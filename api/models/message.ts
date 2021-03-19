@@ -19,9 +19,11 @@ class Message {
             FROM message AS m
             JOIN user AS u ON u.id = m.user_id
             WHERE 1=1
+            
             ${startFilter}
             ${endFilter}
-            ${userFilter}`, 
+            ${userFilter}
+            ORDER by m.created_at`, 
             (error, results, fields) => {
                 values(results.map((message: any) => new MessageModel().createFromDatabase(message)));
             }
