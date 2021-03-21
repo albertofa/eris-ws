@@ -34,6 +34,7 @@ import https from 'https'
 const server = new http.Server(expressServer)
 
 const ws = new io.Server(server,  { cors: { origin: '*' } })
+const connectedUsersHttp: any = []
 ws.on('connection', (socket: Socket) => {
     console.log('connected', socket.id)
     
@@ -47,17 +48,16 @@ ws.on('connection', (socket: Socket) => {
         }
     })
 
-    const connectedUsers: any = []
     socket.on('joinVoice', (data: string) => {
-        console.log('joinVoice', connectedUsers)
+        console.log('joinVoice', connectedUsersHttp)
         socket.join(data)
-        connectedUsers.forEach((room: any) => {
+        connectedUsersHttp.forEach((room: any) => {
             if (room != data && room)
                 socket.to(room).emit('callVoice', data)
         });
         
-        if (!connectedUsers.includes(data))
-            connectedUsers.push(data)
+        if (!connectedUsersHttp.includes(data))
+            connectedUsersHttp.push(data)
     })
 })
 
@@ -77,6 +77,8 @@ if (process.env.IS_TLS == 'true'){
     }
     const serverHttps = new https.Server(credentials, expressServer)
     const wss = new io.Server(serverHttps,  { cors: { origin: '*' } })
+
+    const connectedUsersHttps: any = []
     wss.on('connection', (socket: Socket) => {
         console.log('connected', socket.id)
         
@@ -90,17 +92,16 @@ if (process.env.IS_TLS == 'true'){
             }
         })
 
-        const connectedUsers: any = []
         socket.on('joinVoice', (data: string) => {
-            console.log('joinVoice', connectedUsers)
+            console.log('joinVoice', connectedUsersHttps)
             socket.join(data)
-            connectedUsers.forEach((room: any) => {
+            connectedUsersHttps.forEach((room: any) => {
                 if (room != data && room)
                     socket.to(room).emit('callVoice', data)
             });
             
-            if (!connectedUsers.includes(data))
-                connectedUsers.push(data)
+            if (!connectedUsersHttps.includes(data))
+                connectedUsersHttps.push(data)
         })
     })
    
