@@ -1,7 +1,7 @@
 import express from 'express'
 import history from 'connect-history-api-fallback'
 import cors from 'cors'
-import WebSocketServer from './websocket/WebSocketServer'
+import WebSocketServer from './websocket/webSocketServer'
 import fs from 'fs'
 
 const expressServer = express()
